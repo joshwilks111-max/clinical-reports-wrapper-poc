@@ -129,6 +129,53 @@ describe("safeWrite", () => {
 
     errorSpy.mockRestore();
   });
+
+  it("catches a SYNCHRONOUS throw from a sync writer body (C1 regression)", async () => {
+    // FileAuditWriter runs mkdirSync/writeFileSync synchronously before
+    // returning Promise.resolve(). If either sync call throws (EACCES,
+    // ENOSPC, etc.) the throw escapes before .catch can attach. This test
+    // pins safeWrite's contract: it must catch sync throws too.
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const syncThrowingWriter = {
+      // Note: NOT async — write returns Promise<void> but the body throws sync
+      write(_row: LlmCallRow): Promise<void> {
+        throw new Error("EACCES: permission denied");
+      },
+    };
+
+    const row = makeRow({ block_id: "clinical-impression" });
+
+    await expect(safeWrite(syncThrowingWriter, row)).resolves.toBeUndefined();
+
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[audit:warn] failed to persist row for block 'clinical-impression': EACCES: permission denied. Demo continues; audit row dropped.",
+    );
+
+    errorSpy.mockRestore();
+  });
+
+  it("handles non-Error rejection values via String() fallback", async () => {
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const writer = {
+      write: async (_row: LlmCallRow): Promise<void> => {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw "plain string failure";
+      },
+    };
+
+    await expect(
+      safeWrite(writer, makeRow({ block_id: "b" })),
+    ).resolves.toBeUndefined();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[audit:warn] failed to persist row for block 'b': plain string failure. Demo continues; audit row dropped.",
+    );
+
+    errorSpy.mockRestore();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -172,6 +219,21 @@ describe("createAuditHook", () => {
 
     const writer = opts.writer as InMemoryAuditWriter;
     const row = writer.rows[0]!;
+    expect(row.tokens_in).toBe(0);
+    expect(row.tokens_out).toBe(0);
+  });
+
+  it("defaults individual token fields to 0 when usage object is present but fields are undefined", async () => {
+    const opts = makeOpts();
+    const hook = createAuditHook(opts);
+
+    await hook.onFinish({
+      text: "t",
+      usage: {},
+      finishReason: "stop",
+    });
+
+    const row = (opts.writer as InMemoryAuditWriter).rows[0]!;
     expect(row.tokens_in).toBe(0);
     expect(row.tokens_out).toBe(0);
   });

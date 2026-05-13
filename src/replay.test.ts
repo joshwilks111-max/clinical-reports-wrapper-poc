@@ -40,7 +40,71 @@ describe("createReplayLoader", () => {
   test("fixture present and valid — returns parsed Fixture", async () => {
     writeFileSync(join(dir, "my-block.json"), JSON.stringify(validFixture));
     const replay = createReplayLoader(dir);
-    const result = await replay("my-block", "some prompt");
+    const result = await replay("my-block", validFixture.prompt);
+    expect(result).toEqual(validFixture);
+  });
+
+  test("fixture is JSON null — throws DD2 missing-field message (C2 regression)", async () => {
+    // Without the null-guard, this would crash with `TypeError: Cannot read
+    // properties of null` instead of the locked DD2 missing-field message.
+    const blockId = "null-fixture";
+    writeFileSync(join(dir, `${blockId}.json`), "null");
+    const replay = createReplayLoader(dir);
+
+    let thrown: Error | null = null;
+    try {
+      await replay(blockId, "any prompt");
+    } catch (err) {
+      thrown = err as Error;
+    }
+
+    expect(thrown).not.toBeNull();
+    expect(thrown!.message).toBe(
+      `Error: fixture '${blockId}' is missing required field 'prompt'. Expected shape: { prompt, response, model, tokensIn, tokensOut, finishReason }.`,
+    );
+  });
+
+  test("fixture is JSON number — throws DD2 missing-field message (C2 regression)", async () => {
+    const blockId = "number-fixture";
+    writeFileSync(join(dir, `${blockId}.json`), "42");
+    const replay = createReplayLoader(dir);
+
+    let thrown: Error | null = null;
+    try {
+      await replay(blockId, "any prompt");
+    } catch (err) {
+      thrown = err as Error;
+    }
+
+    expect(thrown).not.toBeNull();
+    expect(thrown!.message).toContain("is missing required field 'prompt'");
+  });
+
+  test("fixture prompt mismatches template prompt — throws prompt-drift message (C3 regression)", async () => {
+    // The audit row pairs (block.prompt, fixture.response). If the template
+    // prompt drifts from the fixture's recorded prompt, the audit row would
+    // claim the new prompt produced the old response. Replay must fail loudly.
+    writeFileSync(join(dir, "drift-block.json"), JSON.stringify(validFixture));
+    const replay = createReplayLoader(dir);
+
+    let thrown: Error | null = null;
+    try {
+      await replay("drift-block", "EDITED template prompt");
+    } catch (err) {
+      thrown = err as Error;
+    }
+
+    expect(thrown).not.toBeNull();
+    expect(thrown!.message).toBe(
+      "Error: fixture 'drift-block' prompt does not match template prompt. The template has been edited since the fixture was recorded. Re-record the fixture or restore the template prompt to match.",
+    );
+  });
+
+  test("fixture prompt matches template prompt — passes", async () => {
+    writeFileSync(join(dir, "match-block.json"), JSON.stringify(validFixture));
+    const replay = createReplayLoader(dir);
+    // Same prompt verbatim — no mismatch
+    const result = await replay("match-block", validFixture.prompt);
     expect(result).toEqual(validFixture);
   });
 
