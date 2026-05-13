@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "call-001",
+  "ts": "2026-01-01T00:00:00.000Z",
+  "block_id": "functional-status-grid",
+  "block_kind": "structured",
+  "model": "openai/gpt-4o",
+  "prompt": "Given the transcript below, extract the functional status grid as JSON with shape {mobility:{walk_distance_m:number}, pain:{vas:number}}. Transcript: <transcript>",
+  "response": "{\"mobility\":{\"walk_distance_m\":50},\"pain\":{\"vas\":7}}",
+  "tokens_in": 142,
+  "tokens_out": 88,
+  "latency_ms": 0,
+  "finish_reason": "stop"
+}
