@@ -1,0 +1,8 @@
+{
+  "prompt": "Write a 2-3 sentence clinical impression paragraph from the transcript below, suitable for the 'Clinical Impression' section of an ACC SRNA report. Reference the claimant's reported function and pain. Transcript: <transcript>",
+  "response": "The claimant presents with reduced functional capacity consistent with a sub-acute mechanical low-back injury at approximately six weeks post-onset. She reports a walking tolerance of approximately 50 metres before pain becomes limiting, with a peak pain rating of 7/10 on the VAS, and identifies prolonged sitting, lifting, and disturbed sleep as her primary functional barriers. A graded return-to-work pathway with concurrent pain physiotherapy and an ergonomic workplace review is recommended to support progressive recovery and sustainable role re-entry.",
+  "model": "openai/gpt-4o",
+  "tokensIn": 168,
+  "tokensOut": 102,
+  "finishReason": "stop"
+}

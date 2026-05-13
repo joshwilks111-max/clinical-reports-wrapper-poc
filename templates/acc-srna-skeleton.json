@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "verbatim",
+    "id": "introduction",
+    "text": "This report has been generated under the requirements of ACC Section 32 IOA assessment standards. All findings are based on the consultation transcript dated 2026-01-01."
+  },
+  {
+    "kind": "structured",
+    "id": "functional-status-grid",
+    "prompt": "Given the transcript below, extract the functional status grid as JSON with shape {mobility:{walk_distance_m:number}, pain:{vas:number}}. Transcript: <transcript>"
+  },
+  {
+    "kind": "generative",
+    "id": "clinical-impression",
+    "prompt": "Write a 2-3 sentence clinical impression paragraph from the transcript below, suitable for the 'Clinical Impression' section of an ACC SRNA report. Reference the claimant's reported function and pain. Transcript: <transcript>"
+  }
+]

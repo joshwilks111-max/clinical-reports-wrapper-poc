@@ -1,0 +1,76 @@
+{
+  "session_id": "session-2026-01-01-jane-citizen",
+  "claimant": {
+    "synthetic_id": "JC-DEMO-001",
+    "display_name": "Jane Citizen",
+    "age": 47
+  },
+  "clinician": {
+    "synthetic_id": "OT-DEMO-002",
+    "display_name": "Dr Alex Reviewer"
+  },
+  "date": "2026-01-01",
+  "consultation_type": "ACC SRNA initial assessment",
+  "turns": [
+    {
+      "speaker": "clinician",
+      "text": "Good morning Jane. Thanks for coming in today. This is your initial social and rehabilitation needs assessment, about six weeks on from your workplace injury. How are you feeling today compared to when it first happened?"
+    },
+    {
+      "speaker": "claimant",
+      "text": "A bit better than those first two weeks, honestly. I'm not lying flat all day anymore. But I'm still getting a lot of pain when I try to do much."
+    },
+    {
+      "speaker": "clinician",
+      "text": "Can you give me a number for your pain right now, on a scale of zero to ten, where ten is the worst you can imagine?"
+    },
+    {
+      "speaker": "claimant",
+      "text": "Right now sitting here it's probably a seven out of ten. It was an eight when I got out of the car. Sitting is actually one of the harder things."
+    },
+    {
+      "speaker": "clinician",
+      "text": "Okay, seven on the VAS — noted. And in terms of walking, how far can you manage before the pain becomes too much and you need to stop?"
+    },
+    {
+      "speaker": "claimant",
+      "text": "Maybe fifty metres? I tried walking to the letterbox and back the other day and that was about my limit. After that the pain just spikes and I have to sit down or lie down."
+    },
+    {
+      "speaker": "clinician",
+      "text": "Fifty metres is a useful baseline. What about lifting — anything around the house, or anything you'd normally do at the workplace?"
+    },
+    {
+      "speaker": "claimant",
+      "text": "I can't really lift anything meaningful. I tried picking up a bag of groceries and felt a sharp pull in my lower back. I've been asking my partner to do most of the heavier stuff."
+    },
+    {
+      "speaker": "clinician",
+      "text": "How is your sleep going? Sometimes lower-back pain can make it hard to find a comfortable position."
+    },
+    {
+      "speaker": "claimant",
+      "text": "Sleep is a real problem. I wake up two or three times a night trying to reposition. I feel exhausted in the mornings and that makes everything else harder to cope with."
+    },
+    {
+      "speaker": "clinician",
+      "text": "That sounds really draining. How are you doing emotionally with all of this? Are you feeling hopeful about getting back to work, or is that feeling a long way off?"
+    },
+    {
+      "speaker": "claimant",
+      "text": "I'm trying to stay positive. I do want to get back to the workplace — I miss the routine. But I'm worried that if I push too hard too fast I'll make things worse. I need a bit of a roadmap."
+    },
+    {
+      "speaker": "clinician",
+      "text": "That is a completely reasonable concern and actually the right instinct. What I'd like to recommend is a graded return-to-work plan, starting with reduced hours and light duties. I'll also arrange an ergonomic review of your workstation, and I'd like to refer you to a pain physiotherapist for a brief course — probably four to six sessions — to help you manage the acute phase and build up your tolerance safely."
+    },
+    {
+      "speaker": "claimant",
+      "text": "That sounds like it could work. When would we be looking at starting the return, roughly?"
+    },
+    {
+      "speaker": "clinician",
+      "text": "Once the physio has had a chance to assess you and we have the ergonomic report back — probably two to three weeks — we can set a formal start date for the graded return. I will document all of this in the SRNA report and your case manager will coordinate from there."
+    }
+  ]
+}

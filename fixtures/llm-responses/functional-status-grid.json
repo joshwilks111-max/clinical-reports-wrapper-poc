@@ -1,0 +1,8 @@
+{
+  "prompt": "Given the transcript below, extract the functional status grid as JSON with shape {mobility:{walk_distance_m:number}, pain:{vas:number}}. Transcript: <transcript>",
+  "response": "{\"mobility\":{\"walk_distance_m\":50},\"pain\":{\"vas\":7}}",
+  "model": "openai/gpt-4o",
+  "tokensIn": 142,
+  "tokensOut": 88,
+  "finishReason": "stop"
+}
