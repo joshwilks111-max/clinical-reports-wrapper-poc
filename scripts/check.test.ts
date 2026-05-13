@@ -7,7 +7,7 @@
  * One subprocess smoke test at the end catches argv + path resolution.
  */
 
-import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import {
   mkdirSync,
   mkdtempSync,
@@ -143,6 +143,28 @@ describe("diffAudit", () => {
     expect(result.missing).toHaveLength(0);
     expect(result.extra).toHaveLength(0);
   });
+
+  test("malformed audit JSON — reports structured DIFF, does not throw (I4 regression)", () => {
+    writeFileSync(join(auditDir, "call-001.json"), "{ not valid json");
+    writeCallJson(goldenDir, "call-001.json");
+
+    const result = diffAudit(auditDir, goldenDir);
+
+    expect(result.diffs).toHaveLength(1);
+    expect(result.diffs[0]).toContain("DIFF in call-001.json");
+    expect(result.diffs[0]).toContain("audit JSON is malformed");
+  });
+
+  test("malformed golden JSON — reports structured DIFF, does not throw (I4 regression)", () => {
+    writeCallJson(auditDir, "call-001.json");
+    writeFileSync(join(goldenDir, "call-001.json"), "{ not valid json");
+
+    const result = diffAudit(auditDir, goldenDir);
+
+    expect(result.diffs).toHaveLength(1);
+    expect(result.diffs[0]).toContain("DIFF in call-001.json");
+    expect(result.diffs[0]).toContain("golden JSON is malformed");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -226,48 +248,6 @@ describe("runCli", () => {
       cwd,
       cleanup: () => rmSync(cwd, { recursive: true, force: true }),
     };
-  }
-
-  /** Collect output and capture exit code without actually calling process.exit. */
-  function captureRun(
-    cwd: string,
-    update: boolean,
-  ): { stdout: string[]; stderr: string[]; exitCode: number } {
-    const stdout: string[] = [];
-    const stderr: string[] = [];
-    let exitCode = -1;
-
-    runCli({
-      cwd,
-      update,
-      runDemo: () => ({ status: 0, stderr: "" }), // demo already ran; audit dir is pre-populated
-      out: (m) => stdout.push(m),
-      err: (m) => stderr.push(m),
-      exit: (code) => {
-        exitCode = code;
-        // Throw to stop execution (simulates process.exit)
-        throw new Error(`__exit__${code}`);
-      },
-    });
-
-    return { stdout, stderr, exitCode };
-  }
-
-  function safeRun(
-    cwd: string,
-    update: boolean,
-  ): { stdout: string[]; stderr: string[]; exitCode: number } {
-    try {
-      return captureRun(cwd, update);
-    } catch (e) {
-      if (e instanceof Error && e.message.startsWith("__exit__")) {
-        // exitCode already captured inside captureRun before throw
-        // Re-read by catching here
-        const code = parseInt(e.message.replace("__exit__", ""), 10);
-        return { stdout: [], stderr: [], exitCode: code };
-      }
-      throw e;
-    }
   }
 
   /** Full capture that collects output before exit throws. */

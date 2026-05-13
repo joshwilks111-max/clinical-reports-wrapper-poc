@@ -1,11 +1,11 @@
 /**
- * Interface contracts shared across lanes.
+ * Shared interface contracts.
  *
- * Lane B (src/audit.ts) implements the audit hook factory.
- * Lane C (src/replay.ts) implements the replay loader.
- * Lane A (src/formatters/*.ts) consumes both via FormatterCtx.
- *
- * These contracts are locked in Round 0 so Round 1 lanes parallelize cleanly.
+ * - `LlmCallRow` is the on-disk audit row written by src/audit.ts.
+ * - `ReplayFn` is the loader signature consumed by formatters and implemented
+ *   in src/replay.ts.
+ * - `FormatterCtx` is what the demo wires up and passes to every formatter
+ *   via src/router.ts.
  */
 
 // ---------------------------------------------------------------------------

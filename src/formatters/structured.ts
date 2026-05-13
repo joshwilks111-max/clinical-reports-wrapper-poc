@@ -105,6 +105,7 @@ export async function structuredFormatter(
     response: fixture.response,
     tokens_in: fixture.tokensIn,
     tokens_out: fixture.tokensOut,
+    // TODO(v1.5): wire latency_ms — needs wall-clock measurement in live mode
     latency_ms: 0,
     finish_reason: fixture.finishReason,
   };

@@ -2,11 +2,14 @@ import type { GenerativeBlock } from "../blocks.ts";
 import type { FormatterCtx, LlmCallRow } from "../types.ts";
 import { safeWrite } from "../audit.ts";
 
+/** Column width for word-wrap. Renders cleanly in Windows cmd, pipes, log capture. */
+const WRAP_COL = 80;
+
 /**
- * Generative formatter — wraps a plain-text LLM response at 80 columns.
+ * Generative formatter — wraps a plain-text LLM response at WRAP_COL columns.
  *
  * No JSON parse. No schema validation. The model owns the prose; we own
- * the line-length contract (DD6) and the audit row (DD4).
+ * the line-length contract and the audit row.
  */
 export async function generativeFormatter(
   block: GenerativeBlock,
@@ -27,6 +30,7 @@ export async function generativeFormatter(
     response: fixture.response,
     tokens_in: fixture.tokensIn,
     tokens_out: fixture.tokensOut,
+    // TODO(v1.5): wire latency_ms — needs wall-clock measurement in live mode
     latency_ms: 0,
     finish_reason: fixture.finishReason,
   };
@@ -37,14 +41,14 @@ export async function generativeFormatter(
 }
 
 /**
- * Wraps text at 80 columns. Preserves paragraph breaks (existing newlines).
+ * Wraps text at WRAP_COL columns. Preserves paragraph breaks (existing newlines).
  *
  * Rules:
  * - Split on existing newlines first.
- * - Lines already ≤ 80 chars are kept as-is.
+ * - Lines already ≤ WRAP_COL chars are kept as-is.
  * - Longer lines are word-wrapped greedily: break at the last space at or
- *   before column 80. Never break inside a word.
- * - A single token longer than 80 chars is placed on its own line unchanged.
+ *   before the column boundary. Never break inside a word.
+ * - A single token longer than WRAP_COL chars is placed on its own line unchanged.
  * - Empty input → empty string.
  */
 function wrapAt80(text: string): string {
@@ -54,7 +58,7 @@ function wrapAt80(text: string): string {
   const result: string[] = [];
 
   for (const paragraph of paragraphs) {
-    if (paragraph.length <= 80) {
+    if (paragraph.length <= WRAP_COL) {
       result.push(paragraph);
       continue;
     }
@@ -67,7 +71,7 @@ function wrapAt80(text: string): string {
       if (currentLine === "") {
         // First word on a new line — place it regardless of length.
         currentLine = word;
-      } else if (currentLine.length + 1 + word.length <= 80) {
+      } else if (currentLine.length + 1 + word.length <= WRAP_COL) {
         currentLine += " " + word;
       } else {
         // Current line is full; flush it and start a new line.
