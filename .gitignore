@@ -1,0 +1,13 @@
+node_modules/
+coverage/
+*.log
+.debug.log
+.DS_Store
+.idea/
+.vscode/
+
+# Runtime audit output — committed canonical copies live under golden/audit/
+audit/
+
+# Bun lockfile IS committed (bun.lockb) — uncomment to reverse
+# bun.lockb

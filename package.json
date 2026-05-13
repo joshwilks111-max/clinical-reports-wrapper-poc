@@ -1,0 +1,23 @@
+{
+  "name": "clinical-reports-wrapper-poc",
+  "version": "0.1.0",
+  "description": "Block-per-block routing proof of concept for clinical report generation.",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "scripts": {
+    "demo": "bun run src/demo.ts",
+    "check": "bun run scripts/check.ts",
+    "test": "bun test --coverage --coverage-reporter=text --coverage-reporter=lcov",
+    "test:unit": "bun test",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.0"
+  }
+}
