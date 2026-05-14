@@ -1,10 +1,9 @@
 /**
- * Audit hook — single emission point (CLAUDE.md hard rule #2).
+ * Audit log writers + createAuditHook factory.
  *
- * Every LLM call routed through the wrapper emits exactly one LlmCallRow via
- * createAuditHook().onFinish. No other code path should write a row.
- *
- * Lane B implementation per Task 3 of the block-routing PoC plan.
+ * Single emission rule: every LlmCallRow written to disk goes through one of
+ * these writers via safeWrite, which catches both sync and async failures so
+ * audit errors never propagate up to the user-facing call path.
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -57,18 +56,24 @@ export class FileAuditWriter implements AuditWriter {
 // ---------------------------------------------------------------------------
 
 /**
- * Calls `writer.write(row)` and catches any thrown error.
+ * Calls `writer.write(row)` and catches any thrown error — both synchronous
+ * throws from a sync writer body and rejected promises from an async writer.
  * Logs the DD2-locked warning message to stderr. Does NOT re-throw.
  *
- * Audit failure must NOT break the user-facing call (CLAUDE.md hard rule #3).
+ * Audit failure must NOT break the user-facing call (CLAUDE.md hard rule #2).
  */
-export function safeWrite(writer: AuditWriter, row: LlmCallRow): Promise<void> {
-  return writer.write(row).catch((err: unknown) => {
+export async function safeWrite(
+  writer: AuditWriter,
+  row: LlmCallRow,
+): Promise<void> {
+  try {
+    await writer.write(row);
+  } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(
       `[audit:warn] failed to persist row for block '${row.block_id}': ${message}. Demo continues; audit row dropped.`,
     );
-  });
+  }
 }
 
 // ---------------------------------------------------------------------------

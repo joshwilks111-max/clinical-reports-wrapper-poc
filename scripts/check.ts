@@ -65,8 +65,26 @@ export function diffAudit(auditDir: string, goldenDir: string): DiffResult {
     const auditContent = readFileSync(join(auditDir, file), "utf-8");
     const goldenContent = readFileSync(join(goldenDir, file), "utf-8");
 
-    const auditObj = JSON.parse(auditContent) as unknown;
-    const goldenObj = JSON.parse(goldenContent) as unknown;
+    // Defensive parse: a corrupted golden or audit file must surface as a
+    // structured DIFF line, not crash the gate with a raw SyntaxError.
+    let auditObj: unknown;
+    try {
+      auditObj = JSON.parse(auditContent);
+    } catch (err) {
+      result.diffs.push(
+        `DIFF in ${file}: audit JSON is malformed (${(err as Error).message})`,
+      );
+      continue;
+    }
+    let goldenObj: unknown;
+    try {
+      goldenObj = JSON.parse(goldenContent);
+    } catch (err) {
+      result.diffs.push(
+        `DIFF in ${file}: golden JSON is malformed (${(err as Error).message})`,
+      );
+      continue;
+    }
 
     const auditPretty = JSON.stringify(auditObj, null, 2);
     const goldenPretty = JSON.stringify(goldenObj, null, 2);

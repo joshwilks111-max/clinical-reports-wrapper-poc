@@ -1,10 +1,12 @@
 /**
- * Replay loader — Lane C implementation (Task 8).
+ * Replay loader for canned LLM responses.
  *
- * Reads canned LLM responses from `${fixturesDir}/${blockId}.json`.
- * Used by formatters in replay mode (v1 PoC — no network, no API key).
+ * Reads `${fixturesDir}/${blockId}.json`, validates shape, and verifies that
+ * the recorded prompt matches the prompt the template passed in. Used in
+ * canned mode (v1 — no network, no API key); the live-mode equivalent will
+ * hit a real provider and emit the same Fixture shape.
  *
- * Failure messages are DD2-locked verbatim — do not paraphrase.
+ * Failure messages are user-facing surfaces — do not paraphrase.
  */
 
 import { readFileSync } from "node:fs";
@@ -35,6 +37,15 @@ export function assertFixtureShape(
     { field: "finishReason", type: "string" },
   ];
 
+  // Guard before the cast: a JSON 'null' or non-object (number, string)
+  // would crash on `record[field]` access. Re-use the first required
+  // field's missing-field message so the DD2 contract holds.
+  if (typeof obj !== "object" || obj === null) {
+    throw new Error(
+      `Error: fixture '${blockId}' is missing required field 'prompt'. Expected shape: { prompt, response, model, tokensIn, tokensOut, finishReason }.`,
+    );
+  }
+
   const record = obj as Record<string, unknown>;
 
   for (const { field, type } of required) {
@@ -61,7 +72,7 @@ export function assertFixtureShape(
  * fresh clone.
  */
 export function createReplayLoader(fixturesDir: string): ReplayFn {
-  return async (blockId: string, _prompt: string): Promise<Fixture> => {
+  return async (blockId: string, prompt: string): Promise<Fixture> => {
     const filePath = join(fixturesDir, `${blockId}.json`);
     const canonicalPath = `fixtures/llm-responses/${blockId}.json`;
 
@@ -87,6 +98,15 @@ export function createReplayLoader(fixturesDir: string): ReplayFn {
     }
 
     assertFixtureShape(parsed, blockId);
+
+    // Credibility surface: the audit row pairs (block.prompt, fixture.response).
+    // If the template prompt drifts from the fixture's recorded prompt, the row
+    // would claim the new prompt produced the old response. Fail loudly instead.
+    if (parsed.prompt !== prompt) {
+      throw new Error(
+        `Error: fixture '${blockId}' prompt does not match template prompt. The template has been edited since the fixture was recorded. Re-record the fixture or restore the template prompt to match.`,
+      );
+    }
 
     return parsed;
   };
