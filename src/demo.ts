@@ -137,5 +137,13 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
-  await main();
+  try {
+    await main();
+  } catch (err: unknown) {
+    // Surface the locked friendly message (from replay.ts / audit.ts / template
+    // load) as clean stderr — no Bun stack trace, no developer-coded shape.
+    // Founder sees the suggested fix, not a call stack.
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
 }
