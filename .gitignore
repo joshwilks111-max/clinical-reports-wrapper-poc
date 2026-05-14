@@ -9,5 +9,8 @@ coverage/
 # Runtime audit output — committed canonical copies live under golden/audit/
 /audit/
 
+# Per-machine gbrain source pointer (analogous to .kubeconfig context)
+.gbrain-source
+
 # Bun lockfile IS committed (bun.lockb) — uncomment to reverse
 # bun.lockb
