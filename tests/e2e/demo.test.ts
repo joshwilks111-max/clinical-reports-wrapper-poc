@@ -14,6 +14,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
@@ -160,5 +161,32 @@ describe("demo e2e", () => {
     expect(result.stderr as string).toContain(
       `Error: cannot create audit directory — 'audit/' is a file. Remove or rename it and re-run.`,
     );
+  });
+
+  test("clean stderr on error (no Bun stack frames) when fixture is missing", () => {
+    // Smoke-test regression: replay-level errors used to bubble up uncaught,
+    // surfacing the locked DD2 message PLUS a Bun stack trace. The top-level
+    // try/catch in demo.ts now suppresses the trace and prints message only.
+    const dir = setupTempDir();
+
+    // Delete one of the canned fixtures so replay throws ENOENT
+    rmSync(join(dir, "fixtures/llm-responses/clinical-impression.json"));
+
+    const result = runDemoIn(dir);
+    const stderr = result.stderr as string;
+
+    // Exit code right
+    expect(result.status).not.toBe(0);
+
+    // The locked DD2 message is present
+    expect(stderr).toContain(
+      "Error: fixture for block 'clinical-impression' not found at fixtures/llm-responses/clinical-impression.json. Re-clone the repo or run 'bun run check --update' to regenerate.",
+    );
+
+    // No Bun stack frames or version banner leaking through
+    expect(stderr).not.toMatch(/^\s+at\s+/m);
+    expect(stderr).not.toMatch(/Bun v\d+\.\d+\.\d+/);
+    expect(stderr).not.toContain("src/replay.ts:");
+    expect(stderr).not.toContain("src/router.ts:");
   });
 });

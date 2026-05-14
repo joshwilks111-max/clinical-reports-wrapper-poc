@@ -2,6 +2,16 @@
 
 All notable changes to clinical-reports-wrapper-poc land here.
 
+## [0.1.2] - 2026-05-14
+
+Smoke-test follow-up. The cold-clone end-to-end smoke (clone + install + demo, total 2s) surfaced one founder-experience gap that /review had missed.
+
+### Fixed
+- **Demo no longer leaks Bun stack traces on error.** When a fixture was missing or the audit-row pipeline threw, the locked DD2 message printed correctly but a Bun stack trace and version banner followed underneath — founder-coded shape, not the friendly one. Wrapped the entry-point `await main()` in a try/catch that surfaces `err.message` only and exits 1. The DD2 message text is unchanged; only the noise after it is gone.
+
+### Tests
+- New e2e regression: `tests/e2e/demo.test.ts` asserts stderr contains the locked DD2 message AND contains zero `at ` stack frames, zero `Bun vX.Y.Z` lines, and no internal source paths after a fixture is deleted. 72 tests pass.
+
 ## [0.1.1] - 2026-05-14
 
 Post-ship review fixes. 3 real bugs caught by the multi-specialist + adversarial pass, plus an AUTO-FIX bundle from the same review.
