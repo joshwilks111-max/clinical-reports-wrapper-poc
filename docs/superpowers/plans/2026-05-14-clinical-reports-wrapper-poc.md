@@ -1,6 +1,8 @@
 # clinical-reports-wrapper-poc — block-routing PoC
 
-> **For agentic workers:** Use `superpowers:subagent-driven-development` for sequential rounds and `superpowers:dispatching-parallel-agents` for Round 1 (3 independent lanes). Source plan: `~/.gstack/projects/Heidi/josh-heidi-wrapper-repo-design-20260513.md`.
+> **STATUS: EXECUTED on 2026-05-14.** All 12 tasks across 4 rounds completed. Shipped as v0.1.0 (initial), then v0.1.1 (post-`/review` fixes), then v0.1.2 (post-smoke-test fix). 72 tests pass, 98% line coverage, 2s cold-clone. Live at https://github.com/joshwilks111-max/clinical-reports-wrapper-poc. See [CHANGELOG.md](../../../CHANGELOG.md) for what each release moved and [TODOS.md](../../../TODOS.md) "From /review (2026-05-14)" for what's deferred.
+>
+> **For future agentic workers:** This plan is preserved for reference. The work is done. Source plan: [2026-05-13-source-brief.md](2026-05-13-source-brief.md).
 
 ## Goal
 
